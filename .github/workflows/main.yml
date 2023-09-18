@@ -29,8 +29,8 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USERNAME }}
-          password: ${{ secrets.VM_PASSWORD }} # Use SSH key or other authentication methods if possible
+          username: ${{ secrets.VM_USER }}
+          password: ${{ secrets.VM_PASS }} # Use SSH key or other authentication methods if possible
           script: |
             docker build -t fe -f /root/new/fe/Dockerfile .
             docker stop fe || true
