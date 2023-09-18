@@ -24,3 +24,15 @@ jobs:
 
       - name: Deploy with rsync
         run: rsync -avz -e "ssh -p ${{ secrets.VM_PORT }}" . ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/root/new/fe/
+
+      - name: SSH into VM and Deploy Container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          password: ${{ secrets.VM_PASSWORD }} # Use SSH key or other authentication methods if possible
+          script: |
+            docker build -t fe -f /root/new/fe/Dockerfile .
+            docker stop fe || true
+            docker rm fe || true
+            docker run -d --name fe -p 3001:3000 fe
