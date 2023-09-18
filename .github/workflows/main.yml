@@ -1,0 +1,21 @@
+name: DEPLOY
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: rsync deployments
+      uses: burnett01/rsync-deployments@5.2
+      with:
+        switches: -avzr --delete
+        path: src/
+        remote_path: /root/new/fe
+        remote_host: 139.59.244.90
+        remote_user: root
+        remote_password: correcthorsebatterystaple
+        remote_key: ${{ secrets.VM_PASSWORD }}
