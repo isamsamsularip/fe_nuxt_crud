@@ -1,21 +1,26 @@
-name: DEPLOY
+name: deploy
 on:
   push:
     branches:
-    - main
-
+      - main
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: rsync deployments
-      uses: burnett01/rsync-deployments@5.2
-      with:
-        switches: -avzr --delete
-        path: src/
-        remote_path: /root/new/fe
-        remote_host: 139.59.244.90
-        remote_user: root
-        remote_password: correcthorsebatterystaple
-        remote_key: ${{ secrets.VM_PASSWORD }}
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+
+      - run: npm install
+      - run: npm run build
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.VM_PASS }}
+          known_hosts: unnecessary
+
+      - name: Adding Known Hosts
+        run: ssh-keyscan -p ${{ secrets.VM_PORT }} -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy with rsync
+        run: rsync -avz -e "ssh -p ${{ secrets.VM_PORT }}" . ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/root/new/fe/
