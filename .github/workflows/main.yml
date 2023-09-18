@@ -23,16 +23,18 @@ jobs:
         run: ssh-keyscan -p ${{ secrets.VM_PORT }} -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy with rsync
-        run: rsync -avz -e "ssh -p ${{ secrets.VM_PORT }}" . ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/root/new/fe/
+        run: |
+          rsync -avz -e "ssh -p ${{ secrets.VM_PORT }}" . ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/root/new/fe/
+          docker build -t fe -f /root/new/fe/Dockerfile .
 
-      - name: SSH into VM and Deploy Container
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          password: ${{ secrets.VM_PASS }} # Use SSH key or other authentication methods if possible
-          script: |
-            docker build -t fe -f /root/new/fe/Dockerfile .
-            docker stop fe || true
-            docker rm fe || true
-            docker run -d --name fe -p 3001:3000 fe
+      # - name: SSH into VM and Deploy Container
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.VM_HOST }}
+      #     username: ${{ secrets.VM_USER }}
+      #     password: ${{ secrets.VM_PASS }} # Use SSH key or other authentication methods if possible
+      #     script: |
+      #       docker build -t fe -f /root/new/fe/Dockerfile .
+      #       docker stop fe || true
+      #       docker rm fe || true
+      #       docker run -d --name fe -p 3001:3000 fe
